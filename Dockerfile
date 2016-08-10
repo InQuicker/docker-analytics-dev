@@ -4,19 +4,24 @@ ENTRYPOINT ["/usr/local/bin/boot"]
 
 VOLUME ["/.boot", "/m2", "/app"]
 
-ENV SASS_VERSION=3.3.6 \
-    SASS_LIBSASS_PATH=/tmp/libsass \
+ENV BOOT_AS_ROOT=yes \
     BOOT_HOME=/.boot \
-    BOOT_AS_ROOT=yes \
+    BOOT_JVM_OPTIONS=-Xmx2g \
     BOOT_LOCAL_REPO=/m2 \
-    BOOT_JVM_OPTIONS=-Xmx2g
+    LIBSODIUM_VERSION=1.0.11 \
+    PHANTOMJS_VERSION=$PHANTOMJS_VERSION \
+    SASS_LIBSASS_PATH=/tmp/libsass \
+    SASS_VERSION=3.3.6
 
 RUN apt-get update && \
     apt-get -y install build-essential && \
-    curl -LOs https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2 && \
-    tar xjf phantomjs-1.9.8-linux-x86_64.tar.bz2 && \
-    cp phantomjs-1.9.8-linux-x86_64/bin/phantomjs /usr/local/bin/ && \
-    rm -r phantomjs-1.9.8-linux-x86_64 phantomjs-1.9.8-linux-x86_64.tar.bz2 && \
+    curl -LOs https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 && \
+    tar xjf phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 && \
+    cp phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin/phantomjs /usr/local/bin/ && \
+    rm -r phantomjs-$PHANTOMJS_VERSION-linux-x86_64 phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 && \
+    curl -LOs https://github.com/jedisct1/libsodium/releases/download/$LIBSODIUM_VERSION/libsodium-$LIBSODIUM_VERSION.tar.gz && \
+    tar -zxvf libsodium-$LIBSODIUM_VERSION.tar.gz && \
+    (cd libsodium-$LIBSODIUM_VERSION && ./configure && make && make check && make install) && \
     git clone --branch $SASS_VERSION --depth 1 https://github.com/sass/libsass.git /tmp/libsass && \
     git clone --branch $SASS_VERSION --depth 1 https://github.com/sass/sassc.git /tmp/sassc && \
     cd /tmp/sassc && \
